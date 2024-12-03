@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ParkingLotStatus {
+  AVAILABLE
+  OCCUPIED
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+}
+
+model User { 
+  id Int @id @default(autoincrement())
+  mail String @unique
+  password String
+  cnpj String
+  name String
+  establishments Establishment[]
+}
+
+model Establishment {
+  id           Int           @id @default(autoincrement())
+  name         String
+  adress       String
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id])
+  parkingLots   ParkingLot[]
+}
+
+model ParkingLot {
+  id            Int             @id @default(autoincrement())
+  number        Int
+  status        ParkingLotStatus
+  establishmentId Int
+  establishment Establishment   @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+  occupancies   Occupancy[]
+}
+
+model Occupancy {
+  id            Int            @id @default(autoincrement())
+  parkingLotId  Int
+  parkingLot    ParkingLot     @relation(fields: [parkingLotId], references: [id], onDelete: Cascade)
+  arriveTime    DateTime
+  leaveTime     DateTime
+  paymentStatus PaymentStatus
+  totalAmount   Float
+  licensePlate  String
+}
+
